@@ -250,8 +250,15 @@
 			file
 				.text()
 				.then((text) => {
-					setRequest(parse(text) as AceRequest);
-					app.name = file.name.replace(/\.(json|ya?ml)$/i, '') || 'Imported';
+					const parsed = parse(text) as any;
+
+					// optional title field: lets a LLM authored YAML/JSON pre-fill
+					// the song name on import. Stripped before setRequest.
+					const importedName =
+						typeof parsed?.title === 'string' && parsed.title.trim() ? parsed.title.trim() : '';
+					delete parsed.title;
+					setRequest(parsed as AceRequest);
+					app.name = importedName || file.name.replace(/\.(json|ya?ml)$/i, '') || 'Imported';
 					app.pendingRequests = [];
 					app.pendingIndex = 0;
 				})
